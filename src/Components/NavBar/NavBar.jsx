@@ -7,6 +7,8 @@ import { useState } from "react";
 
 const navigation = [
 	{ name: "Inicio", href: "/" },
+	{ name: "Servicios", href: "/envios-cuba-miami" },
+	{ name: "Blog", href: "/blog" },
 	{ name: "Tracking", href: "/tracking" },
 	{ name: "Preguntas Frecuentes", href: "/#faq" },
 	{ name: "Términos y Condiciones", href: "/terms" },

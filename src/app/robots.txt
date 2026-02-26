@@ -1,9 +1,0 @@
-User-Agent: *
-
-Sitemap: https://ctenvios.com/sitemap.xml
-
-Allow: /
-Allow: /tracking
-Allow: /terms
-
-

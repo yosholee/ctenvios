@@ -1,5 +1,3 @@
-import Script from "next/script";
-
 // FAQ data for schema markup
 const faqData = [
 	{
@@ -145,34 +143,30 @@ const webSiteSchema = {
 export const JsonLd = () => {
 	return (
 		<>
-			<Script
+			<script
 				id="schema-local-business"
 				type="application/ld+json"
-				strategy="afterInteractive"
 				dangerouslySetInnerHTML={{
 					__html: JSON.stringify(localBusinessSchema),
 				}}
 			/>
-			<Script
+			<script
 				id="schema-organization"
 				type="application/ld+json"
-				strategy="afterInteractive"
 				dangerouslySetInnerHTML={{
 					__html: JSON.stringify(organizationSchema),
 				}}
 			/>
-			<Script
+			<script
 				id="schema-faq"
 				type="application/ld+json"
-				strategy="afterInteractive"
 				dangerouslySetInnerHTML={{
 					__html: JSON.stringify(faqPageSchema),
 				}}
 			/>
-			<Script
+			<script
 				id="schema-website"
 				type="application/ld+json"
-				strategy="afterInteractive"
 				dangerouslySetInnerHTML={{
 					__html: JSON.stringify(webSiteSchema),
 				}}

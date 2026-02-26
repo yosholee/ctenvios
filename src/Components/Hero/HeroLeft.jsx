@@ -7,10 +7,10 @@ export const HeroLeft = () => {
 	return (
 		<div className="mx-auto px-4 text-center">
 			<h1 className="mt-0 text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 xl:text-5xl xl:leading-[3.5rem]">
-				Agencia de Envío de Paquetes a Cuba
+				Envíos a Cuba desde Miami: rápidos y confiables
 			</h1>
 			<h2 className="mt-4 sm:mt-6 text-base sm:text-lg leading-7 sm:leading-8 text-gray-600">
-				CTEnvíos es tu agencia confiable para envíos marítimos y aéreos a Cuba y el Caribe, con más de 20 años de experiencia. Ofrecemos entrega puerta a puerta, seguimiento en tiempo real y atención personalizada desde Hialeah.
+				CTEnvios es tu agencia de envíos a Cuba en Hialeah. Trabajamos envíos marítimos y aéreos con entrega puerta a puerta, tracking y atención personalizada por WhatsApp.
 			</h2>
 			<AnimatedShinyTextDemo />
 			<div className="mt-6 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-y-4 sm:gap-x-6">

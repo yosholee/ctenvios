@@ -65,6 +65,10 @@ export const Footer = () => {
 				<Link href="/terms" className="relative z-50" style={{ pointerEvents: "auto" }}>
 					Términos y Condiciones
 				</Link>
+				{" · "}
+				<Link href="/blog" className="relative z-50" style={{ pointerEvents: "auto" }}>
+					Blog
+				</Link>
 			</div>
 			<div className="relative z-50">© {new Date().getFullYear()} CTEnvios. Todos los derechos reservados.
 				{" · "}
