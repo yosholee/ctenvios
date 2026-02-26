@@ -26,7 +26,7 @@ export const blogPosts = [
 		primaryKeyword: "que no se puede enviar a cuba",
 		publishedAt: "2026-02-26",
 		readTime: "5 min",
-		image: "/ship-new.jpg",
+		image: "/ship2.jpg",
 		imageAlt: "Caja de envío con etiqueta de precaución",
 		content: [
 			"Uno de los errores más costosos es incluir artículos restringidos en un paquete aparentemente normal. Un solo producto no permitido puede provocar retención total o demoras largas.",
@@ -216,7 +216,7 @@ export const blogPosts = [
 		primaryKeyword: "errores comunes enviar paquetes cuba",
 		publishedAt: "2026-04-23",
 		readTime: "5 min",
-		image: "/ship.webp",
+		image: "/cuba_oferta_mayo.webp",
 		imageAlt: "Caja de envío preparada para evitar errores comunes",
 		content: [
 			"Muchos problemas en envíos a Cuba no ocurren en destino, sino en la preparación del paquete en origen.",

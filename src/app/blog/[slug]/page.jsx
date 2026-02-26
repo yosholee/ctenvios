@@ -87,7 +87,8 @@ export default async function BlogPostPage({ params }) {
 						width={1200}
 						height={630}
 						className="h-auto w-full object-cover"
-						priority
+						quality={65}
+						sizes="(max-width: 768px) 100vw, 768px"
 					/>
 				</div>
 
