@@ -1,4 +1,6 @@
-import { React } from "react";
+"use client";
+
+import { useState } from "react";
 
 /*
   This example requires some changes to your config:
@@ -19,6 +21,59 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 
 export default function NewsLetter() {
+	const [formData, setFormData] = useState({
+		email: "",
+		phone: "",
+		consent: false,
+		company: "",
+	});
+	const [status, setStatus] = useState({ type: "", message: "" });
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	const onChange = (event) => {
+		const { name, type, checked, value } = event.target;
+		setFormData((prev) => ({
+			...prev,
+			[name]: type === "checkbox" ? checked : value,
+		}));
+	};
+
+	const onSubmit = async (event) => {
+		event.preventDefault();
+		setStatus({ type: "", message: "" });
+		setIsSubmitting(true);
+
+		try {
+			const response = await fetch("/api/contact", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(formData),
+			});
+			const payload = await response.json();
+
+			if (!response.ok) {
+				setStatus({
+					type: "error",
+					message: payload?.error || "No pudimos enviar tu mensaje. Intenta nuevamente.",
+				});
+				return;
+			}
+
+			setStatus({
+				type: "success",
+				message: "Gracias. Recibimos tus datos y te contactamos pronto.",
+			});
+			setFormData({ email: "", phone: "", consent: false, company: "" });
+		} catch {
+			setStatus({
+				type: "error",
+				message: "No pudimos enviar tu mensaje. Verifica tu conexión e intenta nuevamente.",
+			});
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
 	return (
 		<div className="relative  sm:rounded-3xl isolate overflow-hidden bg-gray-900 py-16 sm:py-24 lg:py-32">
 			<Image
@@ -40,49 +95,83 @@ export default function NewsLetter() {
 						<p className="mt-4 text-lg leading-8 text-white">
 							Mantente informado sobre nuestras noticias, promociones y eventos especiales para envíos a Cuba.
 						</p>
-						<div className="mt-6 flex max-w-md gap-x-4">
-							<label htmlFor="email-address" className="sr-only">
-								Correo electrónico
-							</label>
+							<form className="max-w-md" onSubmit={onSubmit}>
+								<div className="mt-6 flex gap-x-4">
+								<label htmlFor="email-address" className="sr-only">
+									Correo electrónico
+								</label>
+									<input
+									id="email-address"
+									name="email"
+									type="email"
+									autoComplete="email"
+									required
+									value={formData.email}
+									onChange={onChange}
+										className="min-w-0 flex-auto rounded-md border-0 bg-white px-3.5 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-sky-500 sm:text-sm sm:leading-6"
+										placeholder="Entre su Correo"
+									/>
+								</div>
+							<div className="mt-6 flex gap-x-4">
+								<label htmlFor="phone" className="sr-only">
+									Número de teléfono
+								</label>
+									<input
+									id="phone"
+									name="phone"
+									type="tel"
+									autoComplete="tel"
+									required
+									value={formData.phone}
+									onChange={onChange}
+										className="min-w-0 flex-auto rounded-md border-0 bg-white px-3.5 py-2 text-gray-900 placeholder:text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-sky-500 sm:text-sm sm:leading-6"
+										placeholder="Entre su Teléfono"
+									/>
+								</div>
 							<input
-								id="email-address"
-								name="email"
-								type="email"
-								autoComplete="email"
-								required
-								className="min-w-0 flex-auto rounded-md border-0  px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-								placeholder="Entre su Correo"
+								type="text"
+								name="company"
+								value={formData.company}
+								onChange={onChange}
+								tabIndex={-1}
+								autoComplete="off"
+								className="hidden"
+								aria-hidden="true"
 							/>
-						</div>
-						<div className="mt-6 flex max-w-md gap-x-4">
-							<label htmlFor="phone" className="sr-only">
-								Número de teléfono
-							</label>
-							<input
-								id="phone"
-								name="phone"
-								type="tel"
-								autoComplete="tel"
-								required
-								className="min-w-0 flex-auto rounded-md border-0  px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-								placeholder="Entre su Teléfono"
-							/>
-						</div>
-						<div className="flex items-center text-white gap-4 my-4">
-							<input
-								type="checkbox"
-								id="consent-checkbox"
-								name="consent"
-								aria-describedby="consent-description"
-							/>
-							<label htmlFor="consent-checkbox" id="consent-description" className="sr-only">
-								Consentimiento para recibir emails y mensajes de texto informativos y promocionales
-							</label>
-							<span className="text-xs">
-								Acepto recibir emails y mensajes de texto con información y promociones de CTEnvíos.
-							</span>
-						</div>
-						<Button>Unirse</Button>
+							<div className="flex items-center text-white gap-4 my-4">
+								<input
+									type="checkbox"
+									id="consent-checkbox"
+									name="consent"
+									checked={formData.consent}
+									onChange={onChange}
+									aria-describedby="consent-description"
+									required
+								/>
+								<label htmlFor="consent-checkbox" id="consent-description" className="sr-only">
+									Consentimiento para recibir emails y mensajes de texto informativos y promocionales
+								</label>
+								<span className="text-xs">
+									Acepto recibir emails y mensajes de texto con información y promociones de CTEnvíos.
+								</span>
+							</div>
+							<Button
+								type="submit"
+								disabled={isSubmitting}
+								aria-busy={isSubmitting}
+								className="disabled:opacity-70 disabled:cursor-not-allowed"
+							>
+								{isSubmitting ? "Enviando..." : "Unirse"}
+							</Button>
+							{status.message && (
+								<p
+									className={`mt-3 text-sm ${status.type === "error" ? "text-red-300" : "text-green-300"}`}
+									role="status"
+								>
+									{status.message}
+								</p>
+							)}
+						</form>
 					</div>
 					<div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:pt-2">
 						<div className="flex flex-col items-start">
