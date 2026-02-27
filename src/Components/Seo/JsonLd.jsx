@@ -1,31 +1,3 @@
-// FAQ data for schema markup
-const faqData = [
-	{
-		question: "¿Qué tiempo demora un envío a Cuba?",
-		answer: "Generalmente, nuestros envíos de paquetes a Cuba tardan entre 30 y 45 días laborables. El tiempo de entrega varía según la provincia, con las provincias orientales siendo las que más tiempo requieren para la entrega.",
-	},
-	{
-		question: "¿Cuál es el peso máximo permitido para un paquete?",
-		answer: "El peso máximo permitido para un paquete es de 30 kg. Si su envío supera este peso, deberá dividirlo en varios paquetes para un envío seguro y eficiente.",
-	},
-	{
-		question: "¿Qué artículos están prohibidos para enviar a Cuba?",
-		answer: "Está prohibido enviar artículos como drogas, armas, explosivos, materiales inflamables, animales vivos, dinero en efectivo y otros artículos ilegales o peligrosos.",
-	},
-	{
-		question: "¿Ofrecen seguro para los envíos a Cuba?",
-		answer: "Sí, ofrecemos opciones de seguro para sus envíos a Cuba. El costo del seguro varía según el valor declarado del contenido del paquete.",
-	},
-	{
-		question: "¿Cómo puedo rastrear mi paquete?",
-		answer: "Puede rastrear su paquete utilizando el número de seguimiento proporcionado al momento del envío. Ingrese este número en la sección de Tracking de nuestra página web para obtener actualizaciones en tiempo real.",
-	},
-	{
-		question: "¿Qué hago si mi paquete se pierde o se daña?",
-		answer: "En caso de pérdida o daño de su paquete, contáctenos inmediatamente. Tenemos un proceso de reclamación que debe iniciarse dentro de los 15 días posteriores a la fecha estimada de entrega.",
-	},
-];
-
 // LocalBusiness Schema
 const localBusinessSchema = {
 	"@context": "https://schema.org",
@@ -109,20 +81,6 @@ const organizationSchema = {
 	],
 };
 
-// FAQPage Schema
-const faqPageSchema = {
-	"@context": "https://schema.org",
-	"@type": "FAQPage",
-	mainEntity: faqData.map((faq) => ({
-		"@type": "Question",
-		name: faq.question,
-		acceptedAnswer: {
-			"@type": "Answer",
-			text: faq.answer,
-		},
-	})),
-};
-
 // WebSite Schema with SearchAction
 const webSiteSchema = {
 	"@context": "https://schema.org",
@@ -155,13 +113,6 @@ export const JsonLd = () => {
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{
 					__html: JSON.stringify(organizationSchema),
-				}}
-			/>
-			<script
-				id="schema-faq"
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{
-					__html: JSON.stringify(faqPageSchema),
 				}}
 			/>
 			<script
