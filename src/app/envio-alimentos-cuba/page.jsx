@@ -1,5 +1,6 @@
 import { ServicePageTemplate } from "@/Components/Seo/ServicePageTemplate";
 import { servicePages } from "@/lib/servicePages";
+import { notFound } from "next/navigation";
 
 const page = servicePages.find((item) => item.slug === "envio-alimentos-cuba");
 
@@ -13,7 +14,11 @@ export const metadata = {
 		"envíos a cuba",
 	],
 	alternates: {
-		canonical: "/envio-alimentos-cuba",
+		canonical: "https://ctenvios.com/envio-alimentos-cuba",
+	},
+	robots: {
+		index: true,
+		follow: true,
 	},
 	openGraph: {
 		title: "Enviar alimentos a Cuba desde Miami",
@@ -24,5 +29,9 @@ export const metadata = {
 };
 
 export default function EnvioAlimentosPage() {
+	if (!page) {
+		notFound();
+	}
+
 	return <ServicePageTemplate page={page} />;
 }

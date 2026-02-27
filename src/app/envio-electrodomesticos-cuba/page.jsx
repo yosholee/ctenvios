@@ -1,5 +1,6 @@
 import { ServicePageTemplate } from "@/Components/Seo/ServicePageTemplate";
 import { servicePages } from "@/lib/servicePages";
+import { notFound } from "next/navigation";
 
 const page = servicePages.find((item) => item.slug === "envio-electrodomesticos-cuba");
 
@@ -13,7 +14,11 @@ export const metadata = {
 		"envío puerta a puerta cuba",
 	],
 	alternates: {
-		canonical: "/envio-electrodomesticos-cuba",
+		canonical: "https://ctenvios.com/envio-electrodomesticos-cuba",
+	},
+	robots: {
+		index: true,
+		follow: true,
 	},
 	openGraph: {
 		title: "Envío de electrodomésticos a Cuba",
@@ -24,5 +29,9 @@ export const metadata = {
 };
 
 export default function EnvioElectrodomesticosPage() {
+	if (!page) {
+		notFound();
+	}
+
 	return <ServicePageTemplate page={page} />;
 }

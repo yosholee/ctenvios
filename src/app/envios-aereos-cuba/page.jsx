@@ -1,5 +1,6 @@
 import { ServicePageTemplate } from "@/Components/Seo/ServicePageTemplate";
 import { servicePages } from "@/lib/servicePages";
+import { notFound } from "next/navigation";
 
 const page = servicePages.find((item) => item.slug === "envios-aereos-cuba");
 
@@ -13,7 +14,11 @@ export const metadata = {
 		"enviar paquete a cuba precio",
 	],
 	alternates: {
-		canonical: "/envios-aereos-cuba",
+		canonical: "https://ctenvios.com/envios-aereos-cuba",
+	},
+	robots: {
+		index: true,
+		follow: true,
 	},
 	openGraph: {
 		title: "Envíos aéreos a Cuba con entrega rápida",
@@ -24,5 +29,9 @@ export const metadata = {
 };
 
 export default function EnviosAereosPage() {
+	if (!page) {
+		notFound();
+	}
+
 	return <ServicePageTemplate page={page} />;
 }
