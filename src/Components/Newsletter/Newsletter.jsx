@@ -61,7 +61,7 @@ export default function NewsLetter() {
 
 			setStatus({
 				type: "success",
-				message: "Gracias. Recibimos tus datos y te contactamos pronto.",
+				message: "Gracias. Recibimos tus datos y lo contactaremos pronto.",
 			});
 			setFormData({ email: "", phone: "", consent: false, company: "" });
 		} catch {

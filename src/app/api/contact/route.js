@@ -6,6 +6,17 @@ function isValidEmail(email) {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function isValidFromField(value) {
+	const trimmed = value.trim();
+	const plainEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	const namedEmail = /^[^<>]+<\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*>$/;
+	return plainEmail.test(trimmed) || namedEmail.test(trimmed);
+}
+
+function normalizeEnvValue(value) {
+	return value?.trim().replace(/^['"]|['"]$/g, "");
+}
+
 export async function POST(request) {
 	try {
 		const body = await request.json();
@@ -37,8 +48,9 @@ export async function POST(request) {
 			);
 		}
 
-		const toEmail = process.env.CONTACT_TO_EMAIL || "soporte@ctenvios.com";
-		const fromEmail = process.env.CONTACT_FROM_EMAIL || "CTEnvios <onboarding@resend.dev>";
+		const toEmail = normalizeEnvValue(process.env.CONTACT_TO_EMAIL) || "soporte@ctenvios.com";
+		const fromEmailRaw = normalizeEnvValue(process.env.CONTACT_FROM_EMAIL) || "onboarding@resend.dev";
+		const fromEmail = isValidFromField(fromEmailRaw) ? fromEmailRaw : "onboarding@resend.dev";
 
 		const html = `
 			<h2>Nuevo registro desde web CTEnvios</h2>
