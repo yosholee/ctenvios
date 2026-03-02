@@ -15,6 +15,7 @@ export const SocialMedia = () => {
 				<a
 					href="https://www.facebook.com/people/CTEnvios/100087529462450/"
 					target="_blank"
+					rel="noopener noreferrer"
 					className="w-full sm:w-auto border focus:ring-4 focus:outline-none bg- focus:ring-gray-300 text-gray-800 rounded-lg inline-flex items-center justify-center px-4 py-2.5 "
 				>
 					<svg
@@ -37,6 +38,7 @@ export const SocialMedia = () => {
 				<a
 					href="https://www.instagram.com/ctenvios/"
 					target="_blank"
+					rel="noopener noreferrer"
 					className="w-full sm:w-auto border focus:ring-4 focus:outline-none bg-gray-50 focus:ring-gray-300 text-gray-800 rounded-lg inline-flex items-center justify-center px-4 py-2.5 "
 				>
 					<svg

@@ -106,7 +106,6 @@ export const links = [
 export const viewport = {
 	width: "device-width",
 	initialScale: 1,
-	maximumScale: 1,
 };
 
 export default function RootLayout({ children }) {
@@ -118,27 +117,34 @@ export default function RootLayout({ children }) {
 				<link rel="dns-prefetch" href="https://www.google-analytics.com" />
 				<link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 			</head>
-			<Script src="https://www.googletagmanager.com/gtag/js?id=G-DMGE29VG1R" strategy="afterInteractive" />
-			<Script id="gtag-init" strategy="afterInteractive">
-				{`
-				window.dataLayer = window.dataLayer || [];
-				function gtag(){dataLayer.push(arguments);}
-				gtag('js', new Date());
-
-				gtag('config', 'G-DMGE29VG1R'); // Google Ads
-				gtag('config', 'G-E53C6QQ7Z8'); // Google Analytics 4
-			`}
-			</Script>
 			<body className={inter.className}>
+				<a
+					href="#main-content"
+					className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-gray-900"
+				>
+					Saltar al contenido principal
+				</a>
 				<div className="relative isolate pt-4 max-w-7xl mx-auto sm:px-6 lg:pt-14 lg:px-8">
 					<header>
 						<NavBar />
 					</header>
-					<QueryProvider>{children}</QueryProvider>
+					<div id="main-content">
+						<QueryProvider>{children}</QueryProvider>
+					</div>
 				</div>
 
 				<Footer />
 				<JsonLd />
+				<Script src="https://www.googletagmanager.com/gtag/js?id=G-DMGE29VG1R" strategy="lazyOnload" />
+				<Script id="gtag-init" strategy="lazyOnload">
+					{`
+					window.dataLayer = window.dataLayer || [];
+					function gtag(){dataLayer.push(arguments);}
+					gtag('js', new Date());
+					gtag('config', 'G-DMGE29VG1R');
+					gtag('config', 'G-E53C6QQ7Z8');
+				`}
+				</Script>
 			</body>
 		</html>
 	);

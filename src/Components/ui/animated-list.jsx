@@ -5,7 +5,8 @@ import { AnimatePresence, motion } from "framer-motion";
 export const AnimatedList = React.memo(({
   className,
   children,
-  delay = 1000
+  delay = 1000,
+  maxItems = 8
 }) => {
   const [index, setIndex] = useState(0);
   const childrenArray = React.Children.toArray(children);
@@ -18,7 +19,11 @@ export const AnimatedList = React.memo(({
     return () => clearInterval(interval);
   }, [childrenArray.length, delay]);
 
-  const itemsToShow = useMemo(() => childrenArray.slice(0, index + 1).reverse(), [index, childrenArray]);
+  const itemsToShow = useMemo(() => {
+    const end = index + 1;
+    const start = Math.max(0, end - maxItems);
+    return childrenArray.slice(start, end).reverse();
+  }, [index, childrenArray, maxItems]);
 
   return (
     (<div className={`flex flex-col items-center gap-4 ${className}`}>

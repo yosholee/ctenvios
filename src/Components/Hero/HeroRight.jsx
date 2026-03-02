@@ -1,6 +1,4 @@
-"use client";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 export const HeroRight = () => {
 	return (
@@ -8,21 +6,17 @@ export const HeroRight = () => {
 			<div className="absolute inset-0 bg-[url(/grid.svg)] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
 
 			<div className="mx-auto max-w-2xl sm:py-10 lg:py-42 lg:max-w-none ">
-				<motion.div
-					initial={{ x: 100, opacity: 0 }}
-					animate={{ x: 0, opacity: 1 }}
-					transition={{ duration: 0.8, ease: "easeOut" }}
-				>
+				<div>
 					<Image
 						src="/banner-envios-cuba-compressed.jpg"
 						alt="Envios a Cuba Oferta de Mayo"
 						width={500}
 						height={400}
-						loading="lazy"
-						priority={false}
+						priority
+						sizes="(min-width: 1280px) 500px, (min-width: 1024px) 44vw, 100vw"
 						quality={65}
 					/>
-				</motion.div>
+				</div>
 			</div>
 			<div>
 				<div className="relative  px-6 md:p-0 ">

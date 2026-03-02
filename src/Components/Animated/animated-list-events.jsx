@@ -62,8 +62,8 @@ let events = [
 	},
 ];
 
-// Duplicate notifications array
-const extendedEvents = Array.from({ length: 10 }, () => events).flat();
+// Keep the list lightweight to reduce animation and rendering cost.
+const extendedEvents = Array.from({ length: 4 }, () => events).flat();
 
 const Notification = ({ name, description, icon, color, time }) => {
 	return (
@@ -101,7 +101,7 @@ const Notification = ({ name, description, icon, color, time }) => {
 export const AnimatedListEvents = ({ className }) => {
 	return (
 		<div className="relative flex h-[500px] w-full flex-col p-6 overflow-hidden l">
-			<AnimatedList>
+			<AnimatedList maxItems={7}>
 				{extendedEvents.map((item, idx) => (
 					<Notification {...item} key={idx} />
 				))}

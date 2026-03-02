@@ -26,6 +26,20 @@ export const metadata = {
 		siteName: "CTEnvios",
 		locale: "es_ES",
 		type: "website",
+		images: [
+			{
+				url: "https://ctenvios.com/banner-discounts-compressed.jpg",
+				width: 1200,
+				height: 630,
+				alt: "Tracking de envíos a Cuba con CTEnvios",
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "Rastrear Envío a Cuba - CTEnvios Tracking",
+		description: "Consulta el estado de tu envío en tiempo real con tu número de tracking.",
+		images: ["https://ctenvios.com/banner-discounts-compressed.jpg"],
 	},
 };
 

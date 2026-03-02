@@ -94,6 +94,7 @@ export default function PriceCards() {
 									height={300}
 									loading="lazy"
 									priority={false}
+									sizes="(min-width: 1024px) 420px, (min-width: 640px) 50vw, 100vw"
 									quality={60}
 								/>
 							)}

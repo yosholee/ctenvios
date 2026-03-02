@@ -66,9 +66,9 @@ export default function Faq() {
 			<div>
 				{faqSections.map((section, sectionIndex) => (
 					<div key={sectionIndex} className="mb-10">
-						<h2 className=" cursor-pointer    text-base font-semibold leading-7 text-sky-700">
+						<h3 className=" cursor-pointer    text-base font-semibold leading-7 text-sky-700">
 							{section.title}
-						</h2>
+						</h3>
 						<Accordion type="single" collapsible>
 							{section.faqs.map((faq, faqIndex) => (
 								<AccordionItem key={faqIndex} value={faq.value}>

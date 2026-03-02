@@ -82,6 +82,7 @@ export default function NewsLetter() {
 				alt="Ship Cuba Envíos"
 				loading="lazy"
 				priority={false}
+				sizes="100vw"
 				quality={85}
 				className="lg:block object-center object-cover absolute -z-10 inset-0 bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"
 			/>

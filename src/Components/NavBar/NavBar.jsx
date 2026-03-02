@@ -47,15 +47,7 @@ export default function NavBar() {
 						</Link>
 					))}
 				</div>
-				<div className="hidden lg:flex gap-6 lg:flex-1 lg:justify-end">
-					<button
-						type="button"
-						className="-m-2.5 relative rounded-md p-2.5 text-gray-700"
-						onClick={() => setOpen()}
-					>
-						<span className="sr-only">Close menu</span>
-					</button>
-				</div>
+				<div className="hidden lg:flex gap-6 lg:flex-1 lg:justify-end" />
 			</nav>
 			<Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
 				<div className="fixed inset-0 z-50" />

@@ -1,15 +1,10 @@
-import { lazy, Suspense } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { TrackingContent } from "@/Components/Content/TrackingContent";
 import { Hero } from "@/Components/Hero/Hero";
-import NewsLetter from "@/Components/Newsletter/Newsletter";
 import { SocialMedia } from "@/Components/SocialMedia/SocialMedia";
 import { Stats } from "@/Components/Stats/Stats";
 import Faq from "@/Components/Faq/Faq";
-import { OffersSection } from "./sections/offers-section";
-
-const PriceCards = lazy(() => import("@/Components/Cards/PricesCards"));
-const TrackingSection = lazy(() => import("./sections/tracking-section"));
 
 export const metadata = {
 	title: "Envíos a Cuba desde Miami | Agencia CTEnvios",
@@ -40,16 +35,33 @@ const LoadingFallback = ({ height }) => (
 		<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
 	</div>
 );
+
+const PriceCards = dynamic(() => import("@/Components/Cards/PricesCards"), {
+	loading: () => <LoadingFallback height="h-80" />,
+});
+
+const OffersSection = dynamic(
+	() => import("./sections/offers-section").then((module) => module.OffersSection),
+	{
+		loading: () => <LoadingFallback height="h-80" />,
+	},
+);
+
+const TrackingSection = dynamic(() => import("./sections/tracking-section"), {
+	loading: () => <LoadingFallback height="h-80" />,
+});
+
+const NewsLetter = dynamic(() => import("@/Components/Newsletter/Newsletter"), {
+	loading: () => <LoadingFallback height="h-64" />,
+});
+
 export default function Home() {
 	return (
 		<main>
 			<Hero />
-		
-			<Suspense fallback={<LoadingFallback height="h-80" />}>
-				<PriceCards />
-				<OffersSection />
-				<TrackingSection />
-			</Suspense>
+			<PriceCards />
+			<OffersSection />
+			<TrackingSection />
 			<Stats />
 			<TrackingContent />
 			<SocialMedia />

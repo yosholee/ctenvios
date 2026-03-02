@@ -26,12 +26,20 @@ export async function generateMetadata({ params }) {
 			description: post.description,
 			url: `https://ctenvios.com/blog/${post.slug}`,
 			type: "article",
+			siteName: "CTEnvios",
+			locale: "es_ES",
 			images: [
 				{
 					url: `https://ctenvios.com${post.image}`,
 					alt: post.imageAlt,
 				},
 			],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: post.title,
+			description: post.description,
+			images: [`https://ctenvios.com${post.image}`],
 		},
 	};
 }
@@ -64,11 +72,24 @@ export default async function BlogPostPage({ params }) {
 		},
 		mainEntityOfPage: `https://ctenvios.com/blog/${post.slug}`,
 		image: `https://ctenvios.com${post.image}`,
+		inLanguage: "es",
+		keywords: [post.primaryKeyword, "envíos a cuba", "aduana cuba"],
+	};
+
+	const breadcrumbSchema = {
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{ "@type": "ListItem", position: 1, name: "Inicio", item: "https://ctenvios.com" },
+			{ "@type": "ListItem", position: 2, name: "Blog", item: "https://ctenvios.com/blog" },
+			{ "@type": "ListItem", position: 3, name: post.title, item: `https://ctenvios.com/blog/${post.slug}` },
+		],
 	};
 
 	return (
 		<main className="mx-auto max-w-3xl px-4 py-24 sm:py-28 lg:py-32">
 			<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+			<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
 			<Link href="/blog" className="text-sm font-semibold text-sky-700 hover:text-sky-800">
 				← Volver al blog

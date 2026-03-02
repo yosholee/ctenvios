@@ -56,6 +56,7 @@ export const TrackingContent = () => {
 						width={1600}
 						loading="lazy"
 						priority={false}
+						sizes="(min-width: 1280px) 912px, (min-width: 1024px) 50vw, 100vw"
 						quality={85}
 						alt="Barco de carga transportando contenedores para envíos a Cuba"
 					/>

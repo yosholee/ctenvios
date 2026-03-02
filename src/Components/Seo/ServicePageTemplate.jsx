@@ -2,9 +2,46 @@ import Link from "next/link";
 import { FaqJsonLd } from "./FaqJsonLd";
 
 export function ServicePageTemplate({ page }) {
+	const pageUrl = `https://ctenvios.com/${page.slug}`;
+	const breadcrumbSchema = {
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{
+				"@type": "ListItem",
+				position: 1,
+				name: "Inicio",
+				item: "https://ctenvios.com",
+			},
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: page.title,
+				item: pageUrl,
+			},
+		],
+	};
+
+	const serviceSchema = {
+		"@context": "https://schema.org",
+		"@type": "Service",
+		name: page.title,
+		description: page.description,
+		provider: {
+			"@type": "Organization",
+			name: "CTEnvios",
+			url: "https://ctenvios.com",
+		},
+		serviceType: page.keyword,
+		areaServed: "Cuba",
+		url: pageUrl,
+	};
+
 	return (
 		<main className="mx-auto max-w-4xl px-4 py-24 sm:py-28 lg:py-32">
 			<FaqJsonLd faqs={page.faqs} />
+			<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+			<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
 
 			<header className="mb-12">
 				<p className="text-sm font-semibold text-sky-700 uppercase tracking-wide">{page.keyword}</p>
