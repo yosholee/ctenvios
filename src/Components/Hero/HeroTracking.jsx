@@ -13,10 +13,9 @@ export const HeroTracking = () => {
 	const searchParams = useSearchParams();
 	const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
 	
-	const { data: invoice, isLoading, isError } = useFetchByInvoiceOrHBL(searchTerm);
+	const { data: invoice, isLoading, isError, error } = useFetchByInvoiceOrHBL(searchTerm);
 	const [hasSearched, setHasSearched] = useState(!!searchParams.get("search"));
 
-	
 	useEffect(() => {
 		const currentSearch = searchParams.get("search");
 		if (currentSearch) {
@@ -35,10 +34,6 @@ export const HeroTracking = () => {
 			router.push(`/tracking?search=${encodeURIComponent(newSearchTerm)}`);
 		}
 	};
-
-	if (isError) {
-		<div>Something Wrong</div>;
-	}
 
 	return (
 		<div className="max-w-7xl mx-auto">
@@ -82,6 +77,11 @@ export const HeroTracking = () => {
 								</button>
 							</div>
 						</form>
+						{isError && (
+							<p className="mt-3 text-sm text-red-600" role="alert">
+								{error?.message ?? "Algo salió mal. Intente de nuevo."}
+							</p>
+						)}
 					</div>
 				</div>
 				{invoice == undefined || invoice == null ? (

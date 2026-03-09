@@ -1,0 +1,25 @@
+---
+globs: "**/HeroTracking*.{js,jsx,ts,tsx}" "**/useFetchByInvoiceOrHBL*.{js,ts}" "**/api/tracking/**/*.{js,ts}"
+alwaysApply: false
+---
+# Tracking Lookup Implementation
+
+When implementing or modifying tracking search on landing pages, follow the established pattern.
+
+## Reference
+
+See `docs/TRACKING_LOOKUP_IMPLEMENTATION.md` for the full implementation guide.
+
+## Summary
+
+- **Hook:** `useFetchByInvoiceOrHBL(searchTerm)` – calls `/api/tracking/lookup`
+- **Proxy:** `/api/tracking/lookup` – rate limit (15/min/IP), validation, new API first → production fallback
+- **Params:** `?tracking=X` or `?order_id=X` (numeric-only input)
+- **Response:** `{ parcels: [...], agency, invoiceId, province, city }`
+- **UI:** `TrackingDetails` for results; show `error.message` when `isError`
+
+## Reuse on New Landing Pages
+
+1. Use the same hook and proxy – no changes needed if the route exists
+2. Add a search form that passes input to `useFetchByInvoiceOrHBL`
+3. Render `TrackingDetails` when `invoice` has data; show error when `isError`

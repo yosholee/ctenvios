@@ -1,41 +1,41 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-const production_URL = "https://tracking.ctenvios.com/api/v1";
-const dev_url = "https://tracking.ctenvios.com/api/v1";
-axios.defaults.baseURL = process.env.NODE_ENV === "production" ? production_URL : dev_url;
-const apiKey = "c3VwYmFzZWNyZXQ=";
-axios.defaults.headers.common = { "api-key": apiKey };
-
 const getProductData = async (id) => {
-	const trimedId = id.trim();
-	if (
-		!trimedId ||
-		trimedId === "" ||
-		trimedId === null ||
-		trimedId === undefined ||
-		trimedId.length < 3
-	)
-		return [];
-	if (id.endsWith("CTE") || id.endsWith("cte")) {
-		id = id.slice(0, -3);
+	let trimmedId = id.trim();
+	if (!trimmedId) return [];
+	const isOrderId = /^\d+$/.test(trimmedId);
+	if (!isOrderId && trimmedId.length < 3) return [];
+
+	if (trimmedId.endsWith("CTE") || trimmedId.endsWith("cte")) {
+		trimmedId = trimmedId.slice(0, -3).trim();
 	}
-	//scalp id
-	if (trimedId.length >= 4 && trimedId.length < 7) {
-		const response = await axios.get(`parcels/invoice/${trimedId}`);
-		
-		return response.data;
-	} else {
-		const response = await axios.get(`parcels/hbl/${trimedId}`);
-		return response.data;
+
+	const isOrderIdParam = /^\d+$/.test(trimmedId);
+	const params = isOrderIdParam ? { order_id: trimmedId } : { tracking: trimmedId };
+
+	try {
+		const res = await axios.get("/api/tracking/lookup", {
+			params,
+			timeout: 15000,
+		});
+		return res.data;
+	} catch (err) {
+		if (err.response?.status === 429) {
+			throw new Error("Demasiadas solicitudes. Intente de nuevo en un minuto.");
+		}
+		return null;
 	}
 };
 
 export const useFetchByInvoiceOrHBL = (id) => {
+	const trimmed = id?.trim() ?? "";
+	const hasSearch = /^\d+$/.test(trimmed) || trimmed.length >= 3;
+
 	return useQuery({
 		queryKey: ["fetchProductByHBL", id],
 		queryFn: () => getProductData(id),
-
+		enabled: hasSearch,
 		staleTime: 1000 * 60 * 5,
 	});
 };
