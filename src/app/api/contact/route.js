@@ -17,29 +17,37 @@ function normalizeEnvValue(value) {
 	return value?.trim().replace(/^['"]|['"]$/g, "");
 }
 
+function buildNewsletterHtml(email, phone, consent) {
+	return `
+		<h2>Nuevo registro newsletter CTEnvios</h2>
+		<p><strong>Fuente:</strong> Newsletter (Únete a nuestra familia)</p>
+		<p><strong>Email:</strong> ${email}</p>
+		<p><strong>Teléfono:</strong> ${phone}</p>
+		<p><strong>Consentimiento:</strong> ${consent ? "Sí" : "No"}</p>
+		<p><strong>Fecha:</strong> ${new Date().toISOString()}</p>
+	`;
+}
+
+function buildContactFormHtml(email, phone, consent) {
+	return `
+		<h2>Nueva consulta desde formulario de contacto CTEnvios</h2>
+		<p><strong>Fuente:</strong> Formulario de contacto</p>
+		<p><strong>Email:</strong> ${email}</p>
+		<p><strong>Teléfono:</strong> ${phone}</p>
+		<p><strong>Consentimiento:</strong> ${consent ? "Sí" : "No"}</p>
+		<p><strong>Fecha:</strong> ${new Date().toISOString()}</p>
+	`;
+}
+
 export async function POST(request) {
 	try {
 		const body = await request.json();
-		const email = body?.email?.trim();
-		const phone = body?.phone?.trim();
-		const consent = Boolean(body?.consent);
 		const honeypot = body?.company?.trim();
-
 		if (honeypot) {
 			return NextResponse.json({ ok: true });
 		}
 
-		if (!email || !phone || !consent) {
-			return NextResponse.json(
-				{ error: "Por favor completa correo, teléfono y consentimiento." },
-				{ status: 400 },
-			);
-		}
-
-		if (!isValidEmail(email)) {
-			return NextResponse.json({ error: "Correo electrónico no válido." }, { status: 400 });
-		}
-
+		const isContactForm = body?.source === "contact";
 		const resendApiKey = process.env.RESEND_API_KEY;
 		if (!resendApiKey) {
 			return NextResponse.json(
@@ -49,17 +57,66 @@ export async function POST(request) {
 		}
 
 		const toEmail = normalizeEnvValue(process.env.CONTACT_TO_EMAIL) || "soporte@ctenvios.com";
-		const fromEmailRaw = normalizeEnvValue(process.env.CONTACT_FROM_EMAIL) || "onboarding@resend.dev";
-		const fromEmail = isValidFromField(fromEmailRaw) ? fromEmailRaw : "onboarding@resend.dev";
+		const fromEmailRaw = normalizeEnvValue(process.env.CONTACT_FROM_EMAIL) || "soporte@ctenvios.com";
+		const fromEmail = isValidFromField(fromEmailRaw) ? fromEmailRaw : "soporte@ctenvios.com";
 
-		const html = `
-			<h2>Nuevo registro desde web CTEnvios</h2>
-			<p><strong>Email:</strong> ${email}</p>
-			<p><strong>Teléfono:</strong> ${phone}</p>
-			<p><strong>Consentimiento:</strong> ${consent ? "Sí" : "No"}</p>
-			<p><strong>Fecha:</strong> ${new Date().toISOString()}</p>
-		`;
+		if (isContactForm) {
+			const email = body?.email?.trim();
+			const phone = body?.phone?.trim();
+			const consent = Boolean(body?.consent);
 
+			if (!email || !phone || !consent) {
+				return NextResponse.json(
+					{ error: "Por favor completa correo, teléfono y acepta el consentimiento." },
+					{ status: 400 },
+				);
+			}
+			if (!isValidEmail(email)) {
+				return NextResponse.json({ error: "Correo electrónico no válido." }, { status: 400 });
+			}
+
+			const html = buildContactFormHtml(email, phone, consent);
+			const resendResponse = await fetch(RESEND_API_URL, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${resendApiKey}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					from: fromEmail,
+					to: [toEmail],
+					reply_to: email,
+					subject: "Nueva consulta desde formulario de contacto",
+					html,
+				}),
+			});
+
+			if (!resendResponse.ok) {
+				const errorPayload = await resendResponse.text();
+				return NextResponse.json(
+					{ error: `Error enviando correo: ${errorPayload}` },
+					{ status: 502 },
+				);
+			}
+			return NextResponse.json({ ok: true });
+		}
+
+		// Newsletter flow
+		const email = body?.email?.trim();
+		const phone = body?.phone?.trim();
+		const consent = Boolean(body?.consent);
+
+		if (!email || !phone || !consent) {
+			return NextResponse.json(
+				{ error: "Por favor completa correo, teléfono y consentimiento." },
+				{ status: 400 },
+			);
+		}
+		if (!isValidEmail(email)) {
+			return NextResponse.json({ error: "Correo electrónico no válido." }, { status: 400 });
+		}
+
+		const html = buildNewsletterHtml(email, phone, consent);
 		const resendResponse = await fetch(RESEND_API_URL, {
 			method: "POST",
 			headers: {
@@ -70,7 +127,7 @@ export async function POST(request) {
 				from: fromEmail,
 				to: [toEmail],
 				reply_to: email,
-				subject: "Nuevo contacto desde formulario web",
+				subject: "Nuevo registro newsletter CTEnvios",
 				html,
 			}),
 		});
@@ -82,7 +139,6 @@ export async function POST(request) {
 				{ status: 502 },
 			);
 		}
-
 		return NextResponse.json({ ok: true });
 	} catch (error) {
 		return NextResponse.json(

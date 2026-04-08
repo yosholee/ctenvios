@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { isAllowedTrackingSearch } from "@/lib/trackingSearchValidation";
 
 const PRODUCTION_URL = "https://tracking.ctenvios.com/api/v1";
 const NEW_TRACKING_BASE =
@@ -10,13 +11,20 @@ const API_KEY = process.env.TRACKING_API_KEY ?? "c3VwYmFzZWNyZXQ=";
 
 const MAX_INPUT_LENGTH = 64;
 
+/**
+ * Edge cache: balances fewer invocations vs fresh status.
+ * Fresher (default): ~15s at CDN; tune s-maxage up for more cache hits, down for live data.
+ */
+const CACHE_LOOKUP_OK =
+	"public, s-maxage=15, stale-while-revalidate=45, max-age=10";
+const CACHE_NO_STORE = "private, no-store";
+
 function validateInput(value) {
 	if (!value || typeof value !== "string") return { valid: false, reason: "missing" };
 	const trimmed = value.trim();
 	if (!trimmed) return { valid: false, reason: "empty" };
 	if (trimmed.length > MAX_INPUT_LENGTH) return { valid: false, reason: "too_long" };
-	const isOrderId = /^\d+$/.test(trimmed);
-	if (!isOrderId && trimmed.length < 3) return { valid: false, reason: "too_short" };
+	if (!isAllowedTrackingSearch(trimmed)) return { valid: false, reason: "invalid_format" };
 	return { valid: true, trimmed };
 }
 
@@ -36,7 +44,7 @@ function fetchWithTimeout(url, options = {}, ms = 8000) {
 }
 
 async function fetchFromNewEndpoint(trimmedId) {
-	const isOrderId = /^\d+$/.test(trimmedId);
+	const isOrderId = /^\d{1,7}$/.test(trimmedId);
 	const params = new URLSearchParams(isOrderId ? { order_id: trimmedId } : { tracking: trimmedId });
 	const url = `${NEW_TRACKING_BASE}/api/v1/tracking/lookup?${params}`;
 	const res = await fetchWithTimeout(url, {}, 8000);
@@ -72,6 +80,7 @@ export async function GET(request) {
 			{
 				status: 429,
 				headers: {
+					"Cache-Control": CACHE_NO_STORE,
 					"X-RateLimit-Remaining": String(remaining),
 					"Retry-After": String(resetIn),
 				},
@@ -83,20 +92,32 @@ export async function GET(request) {
 	if (!validation.valid) {
 		return NextResponse.json(
 			{ message: "Parámetro de búsqueda inválido" },
-			{ status: 400 },
+			{ status: 400, headers: { "Cache-Control": CACHE_NO_STORE } },
 		);
 	}
 
 	let trimmedId = validation.trimmed;
-	if (trimmedId.endsWith("CTE") || trimmedId.endsWith("cte")) {
+	if (
+		trimmedId.length > 3 &&
+		(trimmedId.endsWith("CTE") || trimmedId.endsWith("cte"))
+	) {
 		trimmedId = trimmedId.slice(0, -3).trim();
+	}
+	if (!trimmedId) {
+		return NextResponse.json(
+			{ message: "Parámetro de búsqueda inválido" },
+			{ status: 400, headers: { "Cache-Control": CACHE_NO_STORE } },
+		);
 	}
 
 	try {
 		const newData = await fetchFromNewEndpoint(trimmedId);
 		if (!isNotFoundFromNewApi(newData)) {
 			return NextResponse.json(newData, {
-				headers: { "X-RateLimit-Remaining": String(remaining - 1) },
+				headers: {
+					"Cache-Control": CACHE_LOOKUP_OK,
+					"X-RateLimit-Remaining": String(remaining - 1),
+				},
 			});
 		}
 	} catch {
@@ -106,12 +127,15 @@ export async function GET(request) {
 	try {
 		const prodData = await fetchFromProduction(trimmedId);
 		return NextResponse.json(prodData, {
-			headers: { "X-RateLimit-Remaining": String(remaining - 1) },
+			headers: {
+				"Cache-Control": CACHE_LOOKUP_OK,
+				"X-RateLimit-Remaining": String(remaining - 1),
+			},
 		});
 	} catch (err) {
 		return NextResponse.json(
 			{ message: "No se encontró el envío" },
-			{ status: 404 },
+			{ status: 404, headers: { "Cache-Control": CACHE_NO_STORE } },
 		);
 	}
 }

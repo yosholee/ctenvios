@@ -4,6 +4,8 @@ This document describes the tracking lookup flow implemented for the CTEnvios la
 
 > **Cursor rule:** `.cursor/rules/tracking-lookup.mdc` – applies when editing HeroTracking, useFetchByInvoiceOrHBL, or `/api/tracking/**`.
 
+> **New page checklist:** [TRACKING_NEW_PAGE.md](./TRACKING_NEW_PAGE.md)
+
 ---
 
 ## Overview
@@ -60,10 +62,11 @@ User Input → useFetchByInvoiceOrHBL hook → /api/tracking/lookup (proxy)
 
 **Rate limit:** 15 requests/minute per IP (in-memory)
 
-**Validation:**
+**Validation** (`src/lib/trackingSearchValidation.js`):
 - Max 64 chars
-- Min 3 chars for tracking (numeric order_id allowed at any length)
-- CTE suffix stripped before lookup
+- **Order id:** `1–7` digits only
+- **Tracking / HBL:** must start with `CTE` (case-insensitive)
+- Trailing `CTE`/`cte` stripped only when input length &gt; 3
 
 ---
 
@@ -128,6 +131,6 @@ Both APIs must return (or be normalized to):
 
 - **Input trimming:** Remove "CTE" suffix before lookup.
 - **Order ID detection:** `/^\d+$/.test(trimmed)` → use `order_id` param.
-- **Enabled condition:** `enabled: /^\d+$/.test(trimmed) || trimmed.length >= 3`
+- **Enabled condition:** `isAllowedTrackingSearch(trimmed)` (1–7 digits or `CTE…` prefix)
 - **Error handling:** 429 → show "Demasiadas solicitudes. Intente de nuevo en un minuto."
 - **Empty/not found:** Return `null` from hook → UI shows placeholder or "no encontrado".

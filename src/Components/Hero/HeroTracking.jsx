@@ -4,34 +4,50 @@ import { ShadowBg1, ShadowBg2 } from "../ui/ShadowBg1";
 import { MagnifyingGlassIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { TrackingDetails } from "../TrackingDetails/TrackingDetails";
 import { useFetchByInvoiceOrHBL } from "@/Hooks/useFetchByInvoiceOrHBL";
+import { isAllowedTrackingSearch } from "@/lib/trackingSearchValidation";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MdOutlineWhatsapp } from "react-icons/md";
 import Link from "next/link";
 
+const FORMAT_HINT =
+	"Use un número de orden de 1 a 7 dígitos o un HBL que empiece por CTE (ej. CTE2603002CJ302).";
+
 export const HeroTracking = () => {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
-	
+	const initialSearch = searchParams.get("search") || "";
+	const [searchTerm, setSearchTerm] = useState(initialSearch);
+	const [formatError, setFormatError] = useState(
+		initialSearch && !isAllowedTrackingSearch(initialSearch) ? FORMAT_HINT : "",
+	);
+
 	const { data: invoice, isLoading, isError, error } = useFetchByInvoiceOrHBL(searchTerm);
 	const [hasSearched, setHasSearched] = useState(!!searchParams.get("search"));
 
 	useEffect(() => {
-		const currentSearch = searchParams.get("search");
+		const currentSearch = searchParams.get("search") || "";
 		if (currentSearch) {
 			setSearchTerm(currentSearch);
 			setHasSearched(true);
+			setFormatError(
+				isAllowedTrackingSearch(currentSearch) ? "" : FORMAT_HINT,
+			);
 		}
 	}, [searchParams]);
 
 	const handleOnSubmit = (e) => {
 		e.preventDefault();
 		const formData = new FormData(e.target);
-		const newSearchTerm = formData.get("search");
-		if (newSearchTerm !== searchTerm) {
-			setSearchTerm(newSearchTerm);
+		const raw = String(formData.get("search") ?? "").trim();
+		if (!isAllowedTrackingSearch(raw)) {
+			setFormatError(FORMAT_HINT);
+			return;
+		}
+		setFormatError("");
+		if (raw !== searchTerm.trim()) {
+			setSearchTerm(raw);
 			setHasSearched(true);
-			router.push(`/tracking?search=${encodeURIComponent(newSearchTerm)}`);
+			router.push(`/tracking?search=${encodeURIComponent(raw)}`);
 		}
 	};
 
@@ -65,7 +81,8 @@ export const HeroTracking = () => {
 									required
 									defaultValue={searchTerm}
 									className="min-w-0 flex-auto rounded-md border-0 px-3.5 py-2  shadow-sm ring-1 ring-inset ring-blue/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-									placeholder="Buscar por Factura o HBL"
+									placeholder="Nº orden (1–7 dígitos) o HBL (CTE…)"
+									title={FORMAT_HINT}
 								/>
 								<button
 									type="submit"
@@ -77,6 +94,11 @@ export const HeroTracking = () => {
 								</button>
 							</div>
 						</form>
+						{formatError && (
+							<p className="mt-3 text-sm text-amber-700" role="status">
+								{formatError}
+							</p>
+						)}
 						{isError && (
 							<p className="mt-3 text-sm text-red-600" role="alert">
 								{error?.message ?? "Algo salió mal. Intente de nuevo."}

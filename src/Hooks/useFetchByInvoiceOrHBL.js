@@ -1,17 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { isAllowedTrackingSearch } from "@/lib/trackingSearchValidation";
 
 const getProductData = async (id) => {
 	let trimmedId = id.trim();
-	if (!trimmedId) return [];
-	const isOrderId = /^\d+$/.test(trimmedId);
-	if (!isOrderId && trimmedId.length < 3) return [];
+	if (!isAllowedTrackingSearch(trimmedId)) return null;
 
-	if (trimmedId.endsWith("CTE") || trimmedId.endsWith("cte")) {
+	if (
+		trimmedId.length > 3 &&
+		(trimmedId.endsWith("CTE") || trimmedId.endsWith("cte"))
+	) {
 		trimmedId = trimmedId.slice(0, -3).trim();
 	}
+	if (!trimmedId) return null;
 
-	const isOrderIdParam = /^\d+$/.test(trimmedId);
+	const isOrderIdParam = /^\d{1,7}$/.test(trimmedId);
 	const params = isOrderIdParam ? { order_id: trimmedId } : { tracking: trimmedId };
 
 	try {
@@ -30,7 +33,7 @@ const getProductData = async (id) => {
 
 export const useFetchByInvoiceOrHBL = (id) => {
 	const trimmed = id?.trim() ?? "";
-	const hasSearch = /^\d+$/.test(trimmed) || trimmed.length >= 3;
+	const hasSearch = isAllowedTrackingSearch(trimmed);
 
 	return useQuery({
 		queryKey: ["fetchProductByHBL", id],

@@ -14,7 +14,7 @@ See `docs/TRACKING_LOOKUP_IMPLEMENTATION.md` for the full implementation guide.
 
 - **Hook:** `useFetchByInvoiceOrHBL(searchTerm)` – calls `/api/tracking/lookup`
 - **Proxy:** `/api/tracking/lookup` – rate limit (15/min/IP), validation, new API first → production fallback
-- **Params:** `?tracking=X` or `?order_id=X` (numeric-only input)
+- **Params:** `?tracking=X` (CTE…) or `?order_id=X` (1–7 digits); validate with `isAllowedTrackingSearch` from `@/lib/trackingSearchValidation`
 - **Response:** `{ parcels: [...], agency, invoiceId, province, city }`
 - **UI:** `TrackingDetails` for results; show `error.message` when `isError`
 

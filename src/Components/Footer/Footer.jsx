@@ -3,7 +3,7 @@ import { React } from "react";
 import { MdWhatsapp } from "react-icons/md";
 export const Footer = () => {
 	return (
-		<footer className="container text-center mx-auto pt-10 pb-10 relative z-50 bg-white mt-auto">
+		<footer className=" text-center mx-auto pt-10 pb-10 relative z-50 bg-gray-900 ">
 			<div className="relative z-50 h-12 inline-flex gap-8 p-10">
 				<a
 					href="https://www.facebook.com/people/CTEnvios/100087529462450/"
@@ -61,7 +61,7 @@ export const Footer = () => {
 					</svg>
 				</a>
 			</div>
-			<div className="flex text-sm justify-center items-center relative z-50">
+			<div className="flex text-sm justify-center text-white items-center relative z-50">
 				<Link href="/terms" className="relative z-50" style={{ pointerEvents: "auto" }}>
 					Términos y Condiciones
 				</Link>
@@ -70,7 +70,7 @@ export const Footer = () => {
 					Blog
 				</Link>
 			</div>
-			<div className="relative z-50">© {new Date().getFullYear()} CTEnvios. Todos los derechos reservados.
+			<div className="relative z-50 text-white">© {new Date().getFullYear()} CTEnvios. Todos los derechos reservados.
 				{" · "}
 				Desarrollado por Valelee LLC
 				{/* <a href="https://valelee.com" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 underline-offset-2 hover:underline">Valelee LLC</a>*/}

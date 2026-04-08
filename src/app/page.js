@@ -5,6 +5,7 @@ import { Hero } from "@/Components/Hero/Hero";
 import { SocialMedia } from "@/Components/SocialMedia/SocialMedia";
 import { Stats } from "@/Components/Stats/Stats";
 import Faq from "@/Components/Faq/Faq";
+import Contact from "@/Components/shadcn-space/blocks/contact-01";
 
 export const metadata = {
 	title: "Envíos a Cuba desde Miami | Agencia CTEnvios",
@@ -97,7 +98,8 @@ export default function Home() {
 				</div>
 			</section>
 			<Faq />
-			<NewsLetter />
+			
+			
 		</main>
 	);
 }

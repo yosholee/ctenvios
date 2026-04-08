@@ -15,6 +15,7 @@ export const HeroRight = () => {
 						priority
 						sizes="(min-width: 1280px) 500px, (min-width: 1024px) 44vw, 100vw"
 						quality={65}
+						style={{ width: "auto", height: "auto" }}
 					/>
 				</div>
 			</div>

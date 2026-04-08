@@ -30,7 +30,7 @@ export const useFetchHMHistory = (hbl) => {
 		queryKey: ["fetchHMHistory", hbl],
 		queryFn: () => fetchHMHistory(hbl),
 		enabled: Boolean(hbl && hbl.trim() !== ""),
-		staleTime: 1000 * 60 * 5, // 5 minutes
+		staleTime: 1000 * 60 * 10, // align with edge cache (~10m); fewer duplicate /api/historial calls
 		retry: 1,
 	});
 };

@@ -6,6 +6,7 @@ import { Footer } from "@/Components/Footer/Footer";
 import QueryProvider from "@/Utils/Providers/QueryProvider";
 import Script from "next/script";
 import { JsonLd } from "@/Components/Seo/JsonLd";
+import Contact from "@/Components/shadcn-space/blocks/contact-01";
 
 const inter = Inter({
 	subsets: ["latin"],
@@ -132,7 +133,7 @@ export default function RootLayout({ children }) {
 						<QueryProvider>{children}</QueryProvider>
 					</div>
 				</div>
-
+                <Contact />
 				<Footer />
 				<JsonLd />
 				<Script src="https://www.googletagmanager.com/gtag/js?id=G-DMGE29VG1R" strategy="lazyOnload" />
