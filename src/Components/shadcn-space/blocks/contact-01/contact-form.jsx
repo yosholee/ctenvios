@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/Components/ui/button";
+import { Checkbox } from "@/Components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 
 const INITIAL_STATE = {
   email: "",

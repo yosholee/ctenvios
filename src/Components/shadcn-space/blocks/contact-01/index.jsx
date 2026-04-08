@@ -1,7 +1,7 @@
-import ContactInfo from "@/components/shadcn-space/blocks/contact-01/contact-info";
-import ContactForm from "@/components/shadcn-space/blocks/contact-01/contact-form";
+import ContactInfo from "@/Components/shadcn-space/blocks/contact-01/contact-info";
+import ContactForm from "@/Components/shadcn-space/blocks/contact-01/contact-form";
 import Image from "next/image";
-import { Marquee } from "@/components/shadcn-space/animations/marquee";
+import { Marquee } from "@/Components/shadcn-space/animations/marquee";
 
 const Contact = () => {
   return (
