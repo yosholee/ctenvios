@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import { HeroTracking } from "@/Components/Hero/HeroTracking";
 import { TrackingContent } from "@/Components/Content/TrackingContent";
-import { Suspense } from "react";
 import { Stats } from "@/Components/Stats/Stats";
+import { Loader2Icon } from "lucide-react";
 
 export const metadata = {
 	title: "Rastrear Envío a Cuba - Tracking de Paquetes | CTEnvios",
@@ -43,10 +44,21 @@ export const metadata = {
 	},
 };
 
+
+const LoadingFallback = ({ height }) => (
+	<div className={`flex justify-center items-center ${height}`}>
+		<div className="animate-spin">
+			<Loader2Icon className="w-12 h-12 text-gray-900" />
+		</div>
+	</div>
+);
+
 const Tracking = () => {
 	return (
 		<>
-			<HeroTracking />
+			<Suspense fallback={<LoadingFallback height="h-80" />}>
+				<HeroTracking />
+			</Suspense>
 			<Stats />
 			<TrackingContent />
 		</>
