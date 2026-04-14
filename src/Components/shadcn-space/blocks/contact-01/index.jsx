@@ -10,8 +10,8 @@ const Contact = () => {
       <Image
         src="/ship-new.jpg"
         alt="CTEnvios"
-        width={1920}
-        height={1080}
+        width={920}
+        height={800}
         className="absolute inset-0 w-full h-full object-cover [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"
       />
       <div className="max-w-7xl xl:px-16 lg:px-8 px-4 mx-auto relative z-10">

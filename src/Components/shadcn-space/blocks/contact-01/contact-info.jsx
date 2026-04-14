@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 
 
 
@@ -17,7 +17,7 @@ const ContactInfo = () => {
         <div className="flex flex-col gap-1 bg-gray-200/10 p-4 rounded-lg">
           <p className="text-sm font-normal text-white">Teléfono</p>
           <a href="tel:+17867163382" className="text-base font-medium text-white">
-            +17867163382
+            +13058513004
           </a>
         </div>
         <div className="flex flex-col gap-1 bg-gray-200/10 p-4 rounded-lg">
@@ -33,7 +33,7 @@ const ContactInfo = () => {
         className="flex flex-col gap-1 bg-gray-200/10 p-4 rounded-lg animate-in fade-in slide-in-from-left-10 duration-1000 delay-100 ease-in-out fill-mode-both">
         <p className="text-sm font-normal text-white">Ubicación</p>
         <p className="text-base font-medium text-white">
-            10230 NW 80th Ave. Hialeah Gardens
+            10230 NW 80th Ave.33016, Hialeah Gardens, FL
         </p>
       </div>
        

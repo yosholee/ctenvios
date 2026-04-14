@@ -107,7 +107,8 @@ export default async function BlogPostPage({ params }) {
 						alt={post.imageAlt}
 						width={1200}
 						height={630}
-						className="h-auto w-full object-cover"
+						className="w-full object-cover"
+						style={{ height: "auto" }}
 						quality={65}
 						sizes="(max-width: 768px) 100vw, 768px"
 					/>
