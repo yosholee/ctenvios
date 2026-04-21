@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useLayoutEffect, useRef, useState } from "react";
 import { MagnifyingGlassIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { MdOutlineWhatsapp } from "react-icons/md";
 import { parseAsString, useQueryState } from "nuqs";
@@ -12,22 +13,40 @@ import { isAllowedTrackingSearch } from "@/lib/trackingSearchValidation";
 const FORMAT_HINT =
 	"Use un número de orden de 1 a 7 dígitos o un HBL que empiece por CTE (ej. CTE2603002CJ302).";
 
-const searchParser = parseAsString.withDefault("").withOptions({ history: "push" });
+/** URL updates while typing — use replace so history is not one entry per keystroke */
+const searchParser = parseAsString.withDefault("").withOptions({ history: "replace" });
 
 export const HeroTracking = () => {
 	const [search, setSearch] = useQueryState("search", searchParser);
-	const q = search.trim();
+	const urlDraft = search.trim();
 
-	const { data: invoice, isLoading, isError, error } = useFetchByInvoiceOrHBL(q);
+	const [committedQuery, setCommittedQuery] = useState("");
+	const didHydrateFromUrl = useRef(false);
 
-	const formatError = q.length > 0 && !isAllowedTrackingSearch(q) ? FORMAT_HINT : "";
-	const isLookupLoading = Boolean(q) && isAllowedTrackingSearch(q) && isLoading;
+	useLayoutEffect(() => {
+		if (didHydrateFromUrl.current) return;
+		if (typeof window === "undefined") return;
+		const fromUrl = new URLSearchParams(window.location.search).get("search")?.trim() ?? "";
+		didHydrateFromUrl.current = true;
+		if (fromUrl && isAllowedTrackingSearch(fromUrl)) {
+			setCommittedQuery(fromUrl);
+		}
+	}, []);
+
+	const { data: invoice, isLoading, isError, error } = useFetchByInvoiceOrHBL(committedQuery);
+
+	const formatError =
+		urlDraft.length > 0 && !isAllowedTrackingSearch(urlDraft) ? FORMAT_HINT : "";
+	const isLookupLoading =
+		Boolean(committedQuery) &&
+		isAllowedTrackingSearch(committedQuery) &&
+		isLoading;
 
 	const handleOnSubmit = (e) => {
 		e.preventDefault();
-		const raw = String(new FormData(e.target).get("search") ?? "").trim();
-		if (!raw) return;
-		void setSearch(raw);
+		const raw = search.trim();
+		if (!raw || !isAllowedTrackingSearch(raw)) return;
+		setCommittedQuery(raw);
 	};
 
 	return (
@@ -54,12 +73,14 @@ export const HeroTracking = () => {
 								</label>
 								<input
 									id="search"
-									key={q}
 									name="search"
 									type="text"
 									autoComplete="text"
 									required
-									defaultValue={q}
+									value={search}
+									onChange={(e) => {
+										void setSearch(e.target.value);
+									}}
 									className="min-w-0 flex-auto rounded-md border-0 px-3.5 py-2  shadow-sm ring-1 ring-inset ring-blue/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
 									placeholder="Nº orden (1–7 dígitos) o HBL (CTE…)"
 									title={FORMAT_HINT}
