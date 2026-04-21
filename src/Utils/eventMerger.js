@@ -74,11 +74,36 @@ const safeToISOString = (dateValue) => {
 };
 
 /**
+ * Legacy parcel events: location checkpoints without statusCode.
+ * @param {object} ev
+ * @returns {boolean}
+ */
+const isLegacyLocationOnlyEvent = (ev) => {
+	if (!ev || ev.statusCode) return false;
+	return ev.updatedAt != null || ev.locationId != null;
+};
+
+/**
  * Maps events from the base API (parcels) to normalized tracking event format
- * @param {object} ev - Event from base API
+ * @param {object} ev - Event from base API (legacy location rows or new status rows)
  * @returns {object} - Normalized tracking event
  */
 const mapNewEventToTrackingEvent = (ev) => {
+	if (!isLegacyLocationOnlyEvent(ev)) {
+		const ts = safeToISOString(ev.timestamp ?? ev.updatedAt);
+		return {
+			timestamp: ts,
+			statusCode: (ev.statusCode || "UNKNOWN").toUpperCase(),
+			statusName: ev.statusName ?? ev.statusCode ?? "Unknown",
+			statusDescription: ev.statusDescription ?? null,
+			location: ev.location ?? null,
+			locationId: ev.locationId ?? null,
+			updateMethod: ev.updateMethod || "SYSTEM",
+			userName: ev.userName ?? null,
+			source: ev.source || "NEW",
+		};
+	}
+
 	const ts = safeToISOString(ev.updatedAt);
 
 	return {
@@ -170,26 +195,22 @@ export const mergeAndNormalizeEvents = (baseEvents, hmHistoryRaw) => {
 
 	let merged = [...newEvents, ...hmEvents];
 
-	// 1. Sort: locationId <= 5 first (by locationId), then rest by date
+	// 1. Sort: legacy locationId <= 5 first (by locationId), then everything by date
 	merged.sort((a, b) => {
-		const aLocId = a.locationId || Infinity;
-		const bLocId = b.locationId || Infinity;
+		const aLocId = typeof a.locationId === "number" ? a.locationId : Infinity;
+		const bLocId = typeof b.locationId === "number" ? b.locationId : Infinity;
 		const aIsFixed = aLocId <= 5;
 		const bIsFixed = bLocId <= 5;
 
-		// Both have locationId <= 5: sort by locationId
 		if (aIsFixed && bIsFixed) {
 			return aLocId - bLocId;
 		}
-		// Only a has locationId <= 5: a comes first
 		if (aIsFixed && !bIsFixed) {
 			return -1;
 		}
-		// Only b has locationId <= 5: b comes first
 		if (!aIsFixed && bIsFixed) {
 			return 1;
 		}
-		// Both are > 5 or HM events: sort by date
 		const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0;
 		const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0;
 		return aTime - bTime;
@@ -199,7 +220,7 @@ export const mergeAndNormalizeEvents = (baseEvents, hmHistoryRaw) => {
 	const deduped = [];
 	const seen = new Set();
 	for (const ev of merged) {
-		const key = `${ev.timestamp}|${ev.statusCode}|${ev.location || ""}`;
+		const key = `${ev.timestamp}|${ev.statusCode}|${ev.location || ""}|${(ev.statusDescription || "").slice(0, 80)}`;
 		if (!seen.has(key)) {
 			seen.add(key);
 			deduped.push(ev);

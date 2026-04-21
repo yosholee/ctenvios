@@ -1,20 +1,11 @@
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
-import { React, useMemo } from "react";
+import { React } from "react";
 import { TrackingHistoryCard } from "./TrackingHistoryCard";
-import { useFetchHMHistory } from "@/Hooks/useFetchHMHistory";
-import { mergeAndNormalizeEvents } from "@/Utils/eventMerger";
 
 export const TrackingCard = ({ parcel, invoice }) => {
-	const { data: hmHistory, isLoading: isLoadingHM } = useFetchHMHistory(
-		parcel?.hbl
-	);
-
-	const mergedEvents = useMemo(() => {
-		if (!parcel?.events) return [];
-		return mergeAndNormalizeEvents(parcel.events, hmHistory);
-	}, [parcel?.events, hmHistory]);
-
 	if (!parcel) return null;
+
+	const orderOrInvoiceLabel = invoice?.invoiceId ?? invoice?.order_id ?? "";
 
 	return (
 		<div className="relative  z-10 -mx-4 shadow-lg ring-1 ring-slate-900/10 sm:mx-0 sm:rounded-3xl  lg:flex-none">
@@ -31,7 +22,7 @@ export const TrackingCard = ({ parcel, invoice }) => {
 						<span className="inline-flex justify-center rounded-lg text-sm font-semibold py-2 px-3 border  bg-white/5  text-gray-700 ">
 							<span className="flex items-center gap-2">
 								<DocumentTextIcon className="h-6 w-6" />
-								<span aria-hidden="true">{invoice?.invoiceId}</span>
+								<span aria-hidden="true">{orderOrInvoiceLabel}</span>
 							</span>
 						</span>
 					</div>
@@ -48,7 +39,7 @@ export const TrackingCard = ({ parcel, invoice }) => {
 					</div>
 					<span className="text-slate-500 mt-4">{parcel?.description}</span>
 				</div>
-				<TrackingHistoryCard events={mergedEvents} isLoading={isLoadingHM} />
+				<TrackingHistoryCard events={parcel?.events}  />
 			</div>
 		</div>
 	);
