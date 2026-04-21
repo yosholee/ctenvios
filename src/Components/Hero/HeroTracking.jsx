@@ -1,54 +1,33 @@
 "use client";
-import { React, useState, useEffect } from "react";
-import { ShadowBg1, ShadowBg2 } from "../ui/ShadowBg1";
+
+import Link from "next/link";
 import { MagnifyingGlassIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { MdOutlineWhatsapp } from "react-icons/md";
+import { parseAsString, useQueryState } from "nuqs";
+import { ShadowBg1, ShadowBg2 } from "../ui/ShadowBg1";
 import { TrackingDetails } from "../TrackingDetails/TrackingDetails";
 import { useFetchByInvoiceOrHBL } from "@/Hooks/useFetchByInvoiceOrHBL";
 import { isAllowedTrackingSearch } from "@/lib/trackingSearchValidation";
-import { useRouter, useSearchParams } from "next/navigation";
-import { MdOutlineWhatsapp } from "react-icons/md";
-import Link from "next/link";
 
 const FORMAT_HINT =
 	"Use un número de orden de 1 a 7 dígitos o un HBL que empiece por CTE (ej. CTE2603002CJ302).";
 
+const searchParser = parseAsString.withDefault("").withOptions({ history: "push" });
+
 export const HeroTracking = () => {
-	const router = useRouter();
-	const searchParams = useSearchParams();
-	const initialSearch = searchParams.get("search") || "";
-	const [searchTerm, setSearchTerm] = useState(initialSearch);
-	const [formatError, setFormatError] = useState(
-		initialSearch && !isAllowedTrackingSearch(initialSearch) ? FORMAT_HINT : "",
-	);
+	const [search, setSearch] = useQueryState("search", searchParser);
+	const q = search.trim();
 
-	const { data: invoice, isLoading, isError, error } = useFetchByInvoiceOrHBL(searchTerm);
-	const [hasSearched, setHasSearched] = useState(!!searchParams.get("search"));
+	const { data: invoice, isLoading, isError, error } = useFetchByInvoiceOrHBL(q);
 
-	useEffect(() => {
-		const currentSearch = searchParams.get("search") || "";
-		if (currentSearch) {
-			setSearchTerm(currentSearch);
-			setHasSearched(true);
-			setFormatError(
-				isAllowedTrackingSearch(currentSearch) ? "" : FORMAT_HINT,
-			);
-		}
-	}, [searchParams]);
+	const formatError = q.length > 0 && !isAllowedTrackingSearch(q) ? FORMAT_HINT : "";
+	const isLookupLoading = Boolean(q) && isAllowedTrackingSearch(q) && isLoading;
 
 	const handleOnSubmit = (e) => {
 		e.preventDefault();
-		const formData = new FormData(e.target);
-		const raw = String(formData.get("search") ?? "").trim();
-		if (!isAllowedTrackingSearch(raw)) {
-			setFormatError(FORMAT_HINT);
-			return;
-		}
-		setFormatError("");
-		if (raw !== searchTerm.trim()) {
-			setSearchTerm(raw);
-			setHasSearched(true);
-			router.push(`/tracking?search=${encodeURIComponent(raw)}`);
-		}
+		const raw = String(new FormData(e.target).get("search") ?? "").trim();
+		if (!raw) return;
+		void setSearch(raw);
 	};
 
 	return (
@@ -60,7 +39,7 @@ export const HeroTracking = () => {
 						<div className=" flex flex-col gap-4 ">
 							<MapPinIcon
 								className={`w-16 h-16 mx-auto text-blue-500 ${
-									hasSearched && isLoading ? "animate-spin" : "animate-bounce"
+									isLookupLoading ? "animate-spin" : "animate-bounce"
 								}`}
 							/>
 							<h2 className="mt-4 text-center text-2xl font-extrabold tracking-tight text-slate-900 xl:text-3xl xl:leading-[2.5rem]">
@@ -75,22 +54,23 @@ export const HeroTracking = () => {
 								</label>
 								<input
 									id="search"
+									key={q}
 									name="search"
 									type="text"
 									autoComplete="text"
 									required
-									defaultValue={searchTerm}
+									defaultValue={q}
 									className="min-w-0 flex-auto rounded-md border-0 px-3.5 py-2  shadow-sm ring-1 ring-inset ring-blue/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
 									placeholder="Nº orden (1–7 dígitos) o HBL (CTE…)"
 									title={FORMAT_HINT}
 								/>
 								<button
 									type="submit"
-									disabled={isLoading}
+									disabled={isLookupLoading}
 									className=" inline-flex justify-center my-4 md:my-0 items-center gap-2 rounded-md bg-blue-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
 								>
 									<MagnifyingGlassIcon className="h-5 w-5" />
-									{hasSearched && isLoading ? "Buscando " : "Buscar"}
+									{isLookupLoading ? "Buscando " : "Buscar"}
 								</button>
 							</div>
 						</form>
@@ -106,7 +86,7 @@ export const HeroTracking = () => {
 						)}
 					</div>
 				</div>
-				{invoice == undefined || invoice == null ? (
+				{invoice == null ? (
 					<div className="flex flex-col max-w-2xl mx-auto gap-2 items-start">
 						<p className="mt-4 text-md leading-8 text-gray-600">
 							Rastree su paquete a Cuba fácilmente. Nuestro sistema de tracking le ofrece
