@@ -42,6 +42,9 @@ export const HeroTracking = () => {
 	const { data: invoice, isLoading, isError, isFetched, error } =
 		useFetchByInvoiceOrHBL(searchTerm);
 
+
+		console.log(invoice, "invoice");
+
 	const formatError =
 		inputValue.trim().length > 0 && !inputAllowed ? FORMAT_HINT : "";
 
@@ -79,11 +82,7 @@ export const HeroTracking = () => {
 							</p>
 						</div>
 
-						<div className="mt-8 rounded-2xl bg-white/90 ring-1 ring-slate-900/10 shadow-md px-4 py-6 sm:px-8 sm:py-8">
-							<h3 className="text-lg font-semibold text-slate-900">Buscar envío</h3>
-							<p className="mt-1 text-sm text-slate-500">
-								El enlace se actualiza al buscar; la consulta solo se ejecuta al pulsar el botón.
-							</p>
+						
 							<form onSubmit={handleOnSubmit} className="mt-6">
 								<div className="flex flex-col md:flex-row max-w-md gap-x-4 gap-y-3 md:items-stretch">
 									<label htmlFor="search" className="sr-only">
@@ -119,7 +118,7 @@ export const HeroTracking = () => {
 									</button>
 								</div>
 							</form>
-						</div>
+						
 
 						{formatError && (
 							<p className="mt-3 text-sm text-amber-700" role="status">
