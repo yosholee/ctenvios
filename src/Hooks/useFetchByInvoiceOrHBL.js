@@ -1,29 +1,40 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { isAllowedTrackingSearch } from "@/lib/trackingSearchValidation";
 
-const getProductData = async (hbl) => {
-	
-	try {
-		const res = await axios.get(`https://api.ctenvios.com/api/v1/tracking/lookup/${hbl}`);
-		return res.data;
-	} catch (err) {
-		if (err.response?.status === 429) {
-			throw new Error("Demasiadas solicitudes. Intente de nuevo en un minuto.");
-		}
+/**
+ * @param {string} trimmed
+ * @returns {Promise<unknown | null>}
+ */
+const fetchTrackingLookup = async (trimmed) => {
+	const isOrderId = /^\d{1,7}$/.test(trimmed);
+	const params = new URLSearchParams(
+		isOrderId ? { order_id: trimmed } : { tracking: trimmed },
+	);
+	const res = await fetch(`/api/tracking/lookup?${params}`);
+	if (res.status === 429) {
+		throw new Error("Demasiadas solicitudes. Intente de nuevo en un minuto.");
+	}
+	if (res.status === 404) {
 		return null;
 	}
+	if (!res.ok) {
+		const body = await res.json().catch(() => ({}));
+		throw new Error(body.message || "No se encontró el envío");
+	}
+	return res.json();
 };
 
+/**
+ * @param {string|undefined|null} id
+ */
 export const useFetchByInvoiceOrHBL = (id) => {
 	const trimmed = id?.trim() ?? "";
-	const hasSearch = isAllowedTrackingSearch(trimmed);
+	const enabled = trimmed.length > 0 && isAllowedTrackingSearch(trimmed);
 
 	return useQuery({
-		queryKey: ["fetchProductByHBL", id],
-		queryFn: () => getProductData(id),
-		enabled: hasSearch,
+		queryKey: ["tracking-lookup", trimmed],
+		queryFn: () => fetchTrackingLookup(trimmed),
+		enabled,
 		staleTime: 1000 * 60 * 5,
-		enabled: hasSearch,
 	});
 };

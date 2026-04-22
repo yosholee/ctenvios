@@ -2,7 +2,6 @@
 import { React, useState } from "react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const QueryProvider = ({ children }) => {
 	const [client] = useState(
@@ -14,7 +13,7 @@ const QueryProvider = ({ children }) => {
 
 	return (
 		<QueryClientProvider client={client}>
-			<NuqsAdapter>{children}</NuqsAdapter>
+			{children}
 			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	);
