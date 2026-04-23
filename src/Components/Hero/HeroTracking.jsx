@@ -26,13 +26,20 @@ export const HeroTracking = () => {
 	const urlSearch = searchParams.get("search") ?? "";
 
 	const [inputValue, setInputValue] = useState(urlSearch);
-	const [searchTerm, setSearchTerm] = useState(urlSearch);
+	const [searchTerm, setSearchTerm] = useState(
+		isAllowedTrackingSearch(normalizeForLookup(urlSearch))
+			? normalizeForLookup(urlSearch)
+			: "",
+	);
 
+	// URL → input: always keep input in sync with the URL param (back/forward, shared links)
 	useEffect(() => {
+		setInputValue(urlSearch);
 		const normalized = normalizeForLookup(urlSearch);
-		if (urlSearch && isAllowedTrackingSearch(normalized)) {
-			setInputValue(urlSearch);
+		if (isAllowedTrackingSearch(normalized)) {
 			setSearchTerm(normalized);
+		} else {
+			setSearchTerm("");
 		}
 	}, [urlSearch]);
 
@@ -42,24 +49,30 @@ export const HeroTracking = () => {
 	const { data: invoice, isLoading, isError, isFetched, error } =
 		useFetchByInvoiceOrHBL(searchTerm);
 
-
-		
-
 	const formatError =
 		inputValue.trim().length > 0 && !inputAllowed ? FORMAT_HINT : "";
 
 	const showNotFound =
 		isFetched && !isError && invoice === null && Boolean(searchTerm.trim());
 
+	// Input → URL: update the query param on every keystroke (replace so no history spam)
+	const handleInputChange = (e) => {
+		const raw = e.target.value;
+		setInputValue(raw);
+		const params = new URLSearchParams(searchParams.toString());
+		if (raw.trim()) {
+			params.set("search", raw.trim());
+		} else {
+			params.delete("search");
+		}
+		const base = pathname || "/tracking";
+		router.replace(`${base}?${params.toString()}`, { scroll: false });
+	};
+
 	const handleOnSubmit = (e) => {
 		e.preventDefault();
 		if (!inputAllowed) return;
-		const normalized = normalizedInput;
-		setSearchTerm(normalized);
-		const params = new URLSearchParams(searchParams.toString());
-		params.set("search", normalized);
-		const base = pathname || "/tracking";
-		router.replace(`${base}?${params.toString()}`, { scroll: false });
+		setSearchTerm(normalizedInput);
 	};
 
 	return (
@@ -94,7 +107,7 @@ export const HeroTracking = () => {
 										type="text"
 										autoComplete="off"
 										value={inputValue}
-										onChange={(e) => setInputValue(e.target.value)}
+										onChange={handleInputChange}
 										className="min-w-0 flex-auto rounded-md border-0 px-3.5 py-2.5 shadow-sm ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
 										placeholder="Nº orden (1–7 dígitos) o HBL (CTE…)"
 										title={FORMAT_HINT}
