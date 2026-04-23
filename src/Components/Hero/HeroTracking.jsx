@@ -32,15 +32,10 @@ export const HeroTracking = () => {
 			: "",
 	);
 
-	// URL → input: always keep input in sync with the URL param (back/forward, shared links)
+	// URL → input only: keeps the field in sync when navigating back/forward or sharing a link.
+	// searchTerm (the fetch trigger) is intentionally NOT updated here — only the submit button does that.
 	useEffect(() => {
 		setInputValue(urlSearch);
-		const normalized = normalizeForLookup(urlSearch);
-		if (isAllowedTrackingSearch(normalized)) {
-			setSearchTerm(normalized);
-		} else {
-			setSearchTerm("");
-		}
 	}, [urlSearch]);
 
 	const normalizedInput = normalizeForLookup(inputValue);
