@@ -15,7 +15,7 @@ export const TrackingDetails = ({ invoice }) => {
 	}
 
 	return (
-		<div className="flex flex-col gap-4 max-w-2xl mx-auto">
+		<div className="flex flex-col mt-4 gap-4 max-w-2xl mx-auto">
 			{parcels.map((parcel, index) => (
 				<TrackingCard key={`parcel-${index}`} parcel={parcel} invoice={invoice} />
 			))}
