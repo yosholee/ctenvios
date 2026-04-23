@@ -4,6 +4,8 @@ import { TrackingContent } from "@/Components/Content/TrackingContent";
 import { Stats } from "@/Components/Stats/Stats";
 import { Loader2Icon } from "lucide-react";
 
+export const dynamic = "force-static";
+
 export const metadata = {
 	title: "Rastrear Envío a Cuba - Tracking de Paquetes | CTEnvios",
 	description:

@@ -43,7 +43,7 @@ export const HeroTracking = () => {
 		useFetchByInvoiceOrHBL(searchTerm);
 
 
-		console.log(invoice, "invoice");
+		
 
 	const formatError =
 		inputValue.trim().length > 0 && !inputAllowed ? FORMAT_HINT : "";

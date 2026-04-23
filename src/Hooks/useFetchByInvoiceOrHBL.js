@@ -14,12 +14,7 @@ export async function getProductData(hbl) {
    try {
       const res = await axios.get(
          `https://api.ctenvios.com/api/v1/tracking/lookup/${hbl}`,
-         {
-            headers: {
-               "Cache-Control": "no-cache",
-               Pragma: "no-cache",
-            },
-         },
+         
       );
       return res.data;
    } catch (err) {
