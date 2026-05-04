@@ -1,15 +1,12 @@
-import React from "react";
 import { TrackingCard } from "../Cards/TrackingCard";
 
 export const TrackingDetails = ({ invoice }) => {
-	// Early return if invoice is falsy or empty
 	if (!invoice || Object.keys(invoice).length === 0) {
-		<p></p>
+		return null;
 	}
 
 	const { parcels } = invoice;
 
-	// Early return if parcels is falsy or empty
 	if (!parcels || parcels.length === 0) {
 		return null;
 	}

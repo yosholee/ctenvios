@@ -2,6 +2,7 @@
 
 const STATUS_LABELS_ES = {
 	IN_AGENCY: "En agencia",
+	IN_PALLET: "En pallet",
 	IN_DISPATCH: "En despacho",
 	IN_WAREHOUSE: "En almacén (origen)",
 	IN_CONTAINER: "En contenedor",
@@ -21,6 +22,13 @@ const CONTAINER_PHASE_CODES = new Set([
 	"IN_TRANSIT",
 	"AT_PORT_OF_ENTRY",
 	"RELEASED_FROM_CUSTOMS",
+]);
+
+/** Prefer Spanish label over English {@code statusName} when both exist */
+const SPANISH_PRIMARY_CODES = new Set([
+	...CONTAINER_PHASE_CODES,
+	"IN_AGENCY",
+	"IN_PALLET",
 ]);
 
 /**
@@ -85,6 +93,27 @@ const stripInternalUsuarioClauses = (text) => {
 };
 
 /**
+ * Keeps only trusted markup from HM/API copy: normalized {@code <strong>} and {@code <br />}.
+ * Strips any other tags so {@code dangerouslySetInnerHTML} stays constrained.
+ * @param {string} html
+ * @returns {string}
+ */
+export const sanitizeTrustedTrackingHtml = (html) => {
+	if (!html || typeof html !== "string") return "";
+	let s = html.replace(/\r\n/g, "\n");
+	s = s.replace(/<\s*script\b[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, "");
+	s = s.replace(/<\s*style\b[^>]*>[\s\S]*?<\s*\/\s*style\s*>/gi, "");
+	s = s.replace(/<\s*br\s*\/?>/gi, "{{BR}}");
+	s = s.replace(/<\s*\/\s*strong\s*>/gi, "{{/S}}");
+	s = s.replace(/<\s*strong\b[^>]*>/gi, "{{S}}");
+	s = s.replace(/<[^>]+>/g, "");
+	s = s.replace(/\{\{BR\}\}/g, "<br />");
+	s = s.replace(/\{\{S\}\}/g, "<strong>");
+	s = s.replace(/\{\{\/S\}\}/g, "</strong>");
+	return s.trim();
+};
+
+/**
  * @param {TrackingEventLike} ev
  * @returns {number}
  */
@@ -95,6 +124,32 @@ const eventTimeMs = (ev) => {
 };
 
 /**
+ * HM/backend rows that look like real events but carry no actionable shipment info.
+ * @param {TrackingEventLike} ev
+ * @returns {boolean}
+ */
+const isNoisePlaceholderTrackingEvent = (ev) => {
+	const code = (ev.statusCode || "").toUpperCase();
+	const desc = String(ev.statusDescription || "").trim();
+	const descLower = desc.toLowerCase();
+
+	if (
+		/evento\s+de\s+tipo\s+['"]?predespacho['"]?\s+sin\s+detalle/i.test(desc)
+	) {
+		return true;
+	}
+
+	if (
+		(code === "UNKNOWN" || code === "DESCONOCIDO") &&
+		descLower.includes("sin detalle")
+	) {
+		return true;
+	}
+
+	return false;
+};
+
+/**
  * Drops duplicate rows with the same status + container line + description (system echoes
  * minutes or hours apart). Keeps the earliest timestamp for each key.
  * @param {TrackingEventLike[]|null|undefined} events
@@ -102,7 +157,8 @@ const eventTimeMs = (ev) => {
  */
 export const dedupeTrackingEventsForDisplay = (events) => {
 	if (!events?.length) return [];
-	const sorted = [...events].sort((a, b) => eventTimeMs(a) - eventTimeMs(b));
+	const filtered = events.filter((ev) => !isNoisePlaceholderTrackingEvent(ev));
+	const sorted = [...filtered].sort((a, b) => eventTimeMs(a) - eventTimeMs(b));
 	const seen = new Set();
 	const out = [];
 	for (const ev of sorted) {
@@ -118,18 +174,19 @@ export const dedupeTrackingEventsForDisplay = (events) => {
 /**
  * Readable lines for one tracking event (Spanish-first UI).
  * @param {TrackingEventLike} ev
- * @returns {{ primary: string, contextLine: string|null, detail: string|null, location: string|null, statusCode: string }}
+ * @returns {{ primary: string, contextLine: string|null, detail: string|null, locationHtml: string|null, statusCode: string }}
  */
 export const getTrackingEventPresentation = (ev) => {
 	const code = (ev.statusCode || "").toUpperCase();
 	const name = (ev.statusName || "").trim();
 	const detailRaw = ev.statusDescription ? String(ev.statusDescription).trim() : "";
-	const detail = detailRaw ? stripInternalUsuarioClauses(detailRaw) : null;
+	const detailPlain = detailRaw ? stripInternalUsuarioClauses(detailRaw) : null;
+	const detail = detailPlain ? sanitizeTrustedTrackingHtml(detailPlain) : null;
 
 	const fromMap = STATUS_LABELS_ES[code];
 
 	let primary;
-	if (CONTAINER_PHASE_CODES.has(code) && fromMap) {
+	if (SPANISH_PRIMARY_CODES.has(code) && fromMap) {
 		primary = fromMap;
 	} else if (fromMap && name && !isTechnicalDuplicateName(name, code) && !looksLikeRawCode(name)) {
 		primary = name;
@@ -142,11 +199,14 @@ export const getTrackingEventPresentation = (ev) => {
 
 	const contextLine = shouldShowNameAsContext(name, primary, code) ? name : null;
 
+	const locRaw = ev.location ? String(ev.location).trim() : "";
+	const locationHtml = locRaw ? sanitizeTrustedTrackingHtml(locRaw) : null;
+
 	return {
 		primary,
 		contextLine,
 		detail,
-		location: ev.location || null,
+		locationHtml,
 		statusCode: code,
 	};
 };

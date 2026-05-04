@@ -32,11 +32,21 @@ export const HeroTracking = () => {
 			: "",
 	);
 
-	// URL → input only: keeps the field in sync when navigating back/forward or sharing a link.
-	// searchTerm (the fetch trigger) is intentionally NOT updated here — only the submit button does that.
+	// URL → input when Next sees a real navigation (first load, in-app navigation).
+	// Typing uses history.replaceState so searchTerm/useSearchParams stay unchanged until submit.
 	useEffect(() => {
 		setInputValue(urlSearch);
 	}, [urlSearch]);
+
+	// Browser back/forward after replaceState-only URL updates.
+	useEffect(() => {
+		const onPopState = () => {
+			const sp = new URLSearchParams(window.location.search);
+			setInputValue(sp.get("search") ?? "");
+		};
+		window.addEventListener("popstate", onPopState);
+		return () => window.removeEventListener("popstate", onPopState);
+	}, []);
 
 	const normalizedInput = normalizeForLookup(inputValue);
 	const inputAllowed = isAllowedTrackingSearch(normalizedInput);
@@ -50,24 +60,38 @@ export const HeroTracking = () => {
 	const showNotFound =
 		isFetched && !isError && invoice === null && Boolean(searchTerm.trim());
 
-	// Input → URL: update the query param on every keystroke (replace so no history spam)
+	// Input → address bar only (no Next navigation → no GET /tracking per keystroke).
 	const handleInputChange = (e) => {
 		const raw = e.target.value;
 		setInputValue(raw);
-		const params = new URLSearchParams(searchParams.toString());
+		const params = new URLSearchParams(window.location.search);
 		if (raw.trim()) {
 			params.set("search", raw.trim());
 		} else {
 			params.delete("search");
 		}
 		const base = pathname || "/tracking";
-		router.replace(`${base}?${params.toString()}`, { scroll: false });
+		const q = params.toString();
+		const href = q ? `${base}?${q}` : base;
+		window.history.replaceState(null, "", href);
 	};
 
 	const handleOnSubmit = (e) => {
 		e.preventDefault();
 		if (!inputAllowed) return;
 		setSearchTerm(normalizedInput);
+
+		const params = new URLSearchParams(window.location.search);
+		const visible = inputValue.trim();
+		if (visible) params.set("search", visible);
+		else params.delete("search");
+		const base = pathname || "/tracking";
+		const q = params.toString();
+		const href = q ? `${base}?${q}` : base;
+		const current = `${window.location.pathname}${window.location.search}`;
+		if (href !== current) {
+			router.replace(href, { scroll: false });
+		}
 	};
 
 	return (

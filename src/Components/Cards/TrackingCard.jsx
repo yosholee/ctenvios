@@ -1,5 +1,4 @@
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
-import { React } from "react";
 import { TrackingHistoryCard } from "./TrackingHistoryCard";
 
 export const TrackingCard = ({ parcel, invoice }) => {
@@ -39,7 +38,7 @@ export const TrackingCard = ({ parcel, invoice }) => {
 					</div>
 					<span className="text-slate-500 mt-4">{parcel?.description}</span>
 				</div>
-				<TrackingHistoryCard events={parcel?.events}  />
+				<TrackingHistoryCard events={parcel?.events} />
 			</div>
 		</div>
 	);

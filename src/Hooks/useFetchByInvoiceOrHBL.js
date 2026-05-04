@@ -1,40 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { isAllowedTrackingSearch } from "@/lib/trackingSearchValidation";
 
-function isAllowedTrackingSearch(value) {
-   if (value == null || typeof value !== "string") return false;
-   const t = value.trim();
-   if (!t) return false;
-   if (/^\d{1,7}$/.test(t)) return true;
-   if (/^cte/i.test(t)) return true;
-   return false;
-}
+const getProductData = async (hbl) => {
+	
+	try {
+		const res = await axios.get(`https://api.ctenvios.com/api/v1/tracking/lookup/${hbl}`);
+		return res.data;
+	} catch (err) {
+		if (err.response?.status === 429) {
+			throw new Error("Demasiadas solicitudes. Intente de nuevo en un minuto.");
+		}
+		return null;
+	}
+};
 
-export async function getProductData(hbl) {
-   try {
-      const res = await axios.get(
-         `https://api.ctenvios.com/api/v1/tracking/lookup/${hbl}`,
-         
-      );
-      return res.data;
-   } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 429) {
-         throw new Error("Demasiadas solicitudes. Intente de nuevo en un minuto.");
-      }
-      return null;
-   }
-}
+export const useFetchByInvoiceOrHBL = (id) => {
+	const trimmed = id?.trim() ?? "";
+	const hasSearch = isAllowedTrackingSearch(trimmed);
 
-export function useFetchByInvoiceOrHBL(id) {
-   const trimmed = id?.trim() ?? "";
-   const hasSearch = isAllowedTrackingSearch(trimmed);
-
-   return useQuery({
-      queryKey: ["fetchProductByHBL", id],
-      queryFn: () => getProductData(id),
-      enabled: hasSearch,
-      staleTime: 0,
-      gcTime: 0,
-      refetchOnMount: "always",
-   });
-}
+	return useQuery({
+		queryKey: ["fetchProductByHBL", id],
+		queryFn: () => getProductData(id),
+		enabled: hasSearch,
+		staleTime: 1000 * 60 * 5,
+		
+	});
+};
